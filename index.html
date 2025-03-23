@@ -1,0 +1,234 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Personal Assistant</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+        .task-list { margin-top: 20px; }
+        .task-card {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-card button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .task-card button.edit { background: #4CAF50; color: white; }
+        .task-card button.delete { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Virtual Personal Assistant</h1>
+        <form id="taskForm">
+            <input type="text" id="taskName" placeholder="Task Name" required>
+            <input type="datetime-local" id="taskDeadline" required>
+            <select id="taskPriority">
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+            <button type="submit">Add Task</button>
+        </form>
+        <div class="task-list">
+            <h2>Tasks</h2>
+            <div id="tasks"></div>
+        </div>
+    </div>
+    <script>
+        const taskForm = document.getElementById('taskForm');
+        const taskList = document.getElementById('tasks');
+
+        // Function to load tasks from the backend
+        async function loadTasks() {
+            const response = await fetch('http://127.0.0.1:8000/tasks');
+            const tasks = await response.json();
+            taskList.innerHTML = tasks.map((task, index) => `
+                <div class="task-card">
+                    <div>
+                        <strong>${task.name}</strong><br>
+                        Deadline: ${task.deadline}<br>
+                        Priority: ${task.priority}
+                    </div>
+                    <div>
+                        <button class="edit" onclick="editTask(${index})">Edit</button>
+                        <button class="delete" onclick="deleteTask(${index})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add task event listener
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const task = {
+                name: document.getElementById('taskName').value,
+                deadline: document.getElementById('taskDeadline').value + ":00", // Add seconds
+                priority: document.getElementById('taskPriority').value
+            };
+            const response = await fetch('http://127.0.0.1:8000/add-task', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(task)
+            });
+            const result = await response.json();
+            alert(result.message);
+            loadTasks(); // Refresh the task list
+        });
+
+        // Edit task function
+        async function editTask(taskId) {
+            const newName = prompt("Enter new task name:");
+            const newDeadline = prompt("Enter new deadline (YYYY-MM-DDTHH:MM:SS):");
+            const newPriority = prompt("Enter new priority (High/Medium/Low):");
+            const updatedTask = {
+                name: newName,
+                deadline: newDeadline,
+                priority: newPriority
+            };
+            const response = await fetch(`http://127.0.0.1:8000/update-task/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedTask)
+            });
+            const result = await response.json();
+            alert(result.message);
+            loadTasks(); // Refresh the task list
+        }
+
+        // Delete task function
+        async function deleteTask(taskId) {
+            const response = await fetch(`http://127.0.0.1:8000/delete-task/${taskId}`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+            alert(result.message);
+            loadTasks(); // Refresh the task list
+        }
+
+        // Load tasks when the page loads
+        loadTasks();
+    </script>
+</body>
+</html>
+
+ -->
+
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Virtual Personal Assistant</title>
+     <style>
+         body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
+         .container { max-width: 800px; margin: auto; padding: 20px; }
+         input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+         .task-list { margin-top: 20px; }
+         .task-card {
+             background: white; padding: 15px; margin: 10px 0;
+             border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+             display: flex; justify-content: space-between; align-items: center;
+         }
+         .task-card button { margin-left: 10px; padding: 5px 10px; border: none; cursor: pointer; }
+         .task-card .edit { background: #4CAF50; color: white; }
+         .task-card .delete { background: #f44336; color: white; }
+     </style>
+ </head>
+ <body>
+     <div class="container">
+         <h1>Virtual Personal Assistant</h1>
+         <form id="taskForm">
+             <input type="text" id="taskName" placeholder="Task Name" required>
+             <input type="datetime-local" id="taskDeadline" required>
+             <select id="taskPriority">
+                 <option value="High">High</option>
+                 <option value="Medium">Medium</option>
+                 <option value="Low">Low</option>
+             </select>
+             <button type="submit">Add Task</button>
+         </form>
+         <div class="task-list">
+             <h2>Tasks</h2>
+             <div id="tasks"></div>
+         </div>
+     </div>
+ 
+     <script>
+         const taskForm = document.getElementById('taskForm');
+         const taskList = document.getElementById('tasks');
+ 
+         // Load tasks
+         async function loadTasks() {
+             const response = await fetch('http://127.0.0.1:8000/tasks');
+             const tasks = await response.json();
+             taskList.innerHTML = tasks.map((task, index) => `
+                 <div class="task-card">
+                     <div>
+                         <strong>${task.name}</strong><br>
+                         Deadline: ${task.deadline}<br>
+                         Priority: ${task.priority}
+                     </div>
+                     <div>
+                         <button class="edit" onclick="editTask(${index})">Edit</button>
+                         <button class="delete" onclick="deleteTask(${index})">Delete</button>
+                     </div>
+                 </div>
+             `).join('');
+         }
+ 
+         // Add task
+         taskForm.addEventListener('submit', async (e) => {
+             e.preventDefault();
+             const task = {
+                 name: document.getElementById('taskName').value,
+                 deadline: document.getElementById('taskDeadline').value,
+                 priority: document.getElementById('taskPriority').value
+             };
+             const response = await fetch('http://127.0.0.1:8000/add-task', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify(task)
+             });
+             alert((await response.json()).message);
+             loadTasks();
+         });
+ 
+         // Edit task
+         async function editTask(taskId) {
+             const newName = prompt("Enter new task name:");
+             const newDeadline = prompt("Enter new deadline (YYYY-MM-DDTHH:MM):");
+             const newPriority = prompt("Enter new priority (High/Medium/Low):");
+             const updatedTask = { name: newName, deadline: newDeadline, priority: newPriority };
+             const response = await fetch(`http://127.0.0.1:8000/update-task/${taskId}`, {
+                 method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedTask)
+             });
+             alert((await response.json()).message);
+             loadTasks();
+         }
+ 
+         // Delete task
+         async function deleteTask(taskId) {
+             const response = await fetch(`http://127.0.0.1:8000/delete-task/${taskId}`, { method: 'DELETE' });
+             alert((await response.json()).message);
+             loadTasks();
+         }
+ 
+         loadTasks();
+     </script>
+ </body>
+ </html>
+ 
